@@ -1,0 +1,18 @@
+sudo: required
+services:
+  - docker
+env:
+  global:
+    - SHA=$(git rev-parse HEAD)
+before_install:
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - docker build -t alexanderbudnikov/driver-pool -f ./Dockerfile ./
+
+script:
+  - docker run -e CI=true alexanderbudnikov/driver-pool
+
+deploy:
+  provider: script
+  script: bash ./deploy.sh
+  on:
+    branch: main
