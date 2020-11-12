@@ -7,11 +7,12 @@ import org.sda.driverpool.entity.RTreeIndexImpl;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.IntStream;
 
 import static com.github.davidmoten.rtree.RTree.create;
 import static org.junit.Assert.assertNotNull;
 
-public class BlockingRTreeIndexHolderTest {
+public class BlockingRTreeHolderTest {
     private BlockingRTreeHolder holder;
 
     @Before
@@ -46,6 +47,18 @@ public class BlockingRTreeIndexHolderTest {
             holder.produce(new RTreeIndexImpl(create()));
         }).start();
         holder.consume(1, TimeUnit.MILLISECONDS);
+    }
+
+    @Test
+    public void test_aLotProducingsAndConsumings() throws TimeoutException, InterruptedException {
+        new Thread(() -> {
+            for (int i = 0; i < 10000; i++) {
+                holder.produce(new RTreeIndexImpl(create()));
+            }
+        }).start();
+        for (int i = 0; i < 100000; i++) {
+            assertNotNull(holder.consume(10, TimeUnit.MILLISECONDS));
+        }
     }
 
     private void sleep(int millis) {

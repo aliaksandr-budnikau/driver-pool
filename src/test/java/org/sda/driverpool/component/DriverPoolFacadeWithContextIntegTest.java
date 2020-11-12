@@ -1,11 +1,9 @@
 package org.sda.driverpool.component;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.sda.driverpool.Application;
-import org.sda.driverpool.entity.DriverStatus;
 import org.sda.driverpool.event.OrderGotDriverEvent;
 import org.sda.driverpool.event.OrderPendingDriverEvent;
 import org.sda.driverpool.event.RecentDriverStatusUpdateEvent;
@@ -17,9 +15,13 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 import java.util.Random;
+import java.util.concurrent.CountDownLatch;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.verify;
+import static org.sda.driverpool.entity.DriverStatus.ON_RIDE;
+import static org.sda.driverpool.entity.DriverStatus.PENDING_ORDER;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest
@@ -31,55 +33,69 @@ public class DriverPoolFacadeWithContextIntegTest {
     @Autowired
     private DriverPoolFacade facade;
     @Autowired
-    private RTreeRefresher rTreeRefresher;
-
-    @Before
-    public void setUp() {
-        Random random = new Random();
-        for (int i = 0; i < 1000; i++) {
-            int driverId = random.nextInt(100);
-            float position = driverId / 1000000f;
-            facade.handle(new RecentDriverStatusUpdateEvent(
-                            "driver" + driverId,
-                            53.8984f + position,
-                            27.5629f + position,
-                            DriverStatus.values()[driverId % 2]
-                    )
-            );
-        }
-        facade.handle(new RecentDriverStatusUpdateEvent(
-                        "driver101",
-                        53.897883f,
-                        27.562110f,
-                        DriverStatus.PENDING_ORDER
-                )
-        );
-        facade.handle(new RecentDriverStatusUpdateEvent(
-                        "driver101",
-                        53.897883f,
-                        27.562110f,
-                        DriverStatus.ON_RIDE
-                )
-        );
-        facade.handle(new RecentDriverStatusUpdateEvent(
-                        "driver102",
-                        53.897940f,
-                        27.562202f,
-                        DriverStatus.PENDING_ORDER
-                )
-        );
-
-        rTreeRefresher.refresh();
-    }
+    private RTreeRefresher refresher;
 
     @Test
     public void test() throws InterruptedException {
-        OrderPendingDriverEvent event = new OrderPendingDriverEvent(53.897920f, 27.562034f, 0.003854);
+        final CountDownLatch countDownLatch = new CountDownLatch(3);
+        Thread driver1 = new Thread(() -> {
+            await(countDownLatch);
+            startLife(1, 53.898107f, 27.562054f);
+        });
+        driver1.start();
+        countDownLatch.countDown();
+        Thread driver2 = new Thread(() -> {
+            await(countDownLatch);
+            startLife(2, 53.898644f, 27.563259f);
+        });
+        driver2.start();
+        countDownLatch.countDown();
+        Thread driver3 = new Thread(() -> {
+            await(countDownLatch);
+            startLife(3, 53.899149f, 27.564343f);
+        });
+        driver3.start();
+        countDownLatch.countDown();
+
+        sleep(2000);
+        refresher.refresh();
+
+        OrderPendingDriverEvent event = new OrderPendingDriverEvent(53.897877f, 27.561506f, 0.003854);
         facade.handle(event);
 
         ArgumentCaptor<OrderGotDriverEvent> captor = ArgumentCaptor.forClass(OrderGotDriverEvent.class);
         verify(eventSender).send(captor.capture());
         OrderGotDriverEvent outEvent = captor.getValue();
-        assertEquals("driver102", outEvent.getDriverId());
+        assertNotNull(outEvent);
+    }
+
+    private void startLife(int driverIndex, float latitude, float longitude) {
+        Random random = new Random();
+        int ridesCount = random.nextInt(10);
+        for (int j = 0; j < ridesCount; j++) {
+            int pendingOrderCount = random.nextInt(10);
+            for (int i = 0; i < pendingOrderCount; i++) {
+                facade.handle(new RecentDriverStatusUpdateEvent("driver" + driverIndex, latitude, longitude, PENDING_ORDER));
+                sleep(random.nextInt(1000));
+            }
+            sleep(random.nextInt(1000));
+            facade.handle(new RecentDriverStatusUpdateEvent("driver" + driverIndex, latitude, longitude, ON_RIDE));
+        }
+    }
+
+    private void sleep(int time) {
+        try {
+            Thread.sleep(time);
+        } catch (InterruptedException e) {
+            new RuntimeException(e);
+        }
+    }
+
+    private void await(CountDownLatch countDownLatch) {
+        try {
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+            new RuntimeException(e);
+        }
     }
 }
