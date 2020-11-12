@@ -1,4 +1,6 @@
 FROM adoptopenjdk/maven-openjdk11:latest
+RUN addgroup -S spring && adduser -S spring -G spring
+USER spring:spring
 WORKDIR /opt/app
 COPY ./src ./src
 COPY ./pom.xml ./pom.xml
