@@ -52,11 +52,11 @@ public class BlockingRTreeHolderTest {
     @Test
     public void test_aLotProducingsAndConsumings() throws TimeoutException, InterruptedException {
         new Thread(() -> {
-            for (int i = 0; i < 10000; i++) {
+            for (int i = 0; i < 1000; i++) {
                 holder.produce(new RTreeIndexImpl(create()));
             }
         }).start();
-        for (int i = 0; i < 100000; i++) {
+        for (int i = 0; i < 10000; i++) {
             assertNotNull(holder.consume(10, TimeUnit.MILLISECONDS));
         }
     }

@@ -12,16 +12,16 @@ import java.util.concurrent.TimeoutException;
 class BlockingRTreeHolder extends BlockingItemHolder<RTreeIndex> {
     @Override
     public synchronized void produce(RTreeIndex index) {
-        log.info("Producing new RTreeIndex with size = {}", index.getSize());
+        log.debug("Producing new RTreeIndex with size = {}", index.getSize());
         super.produce(index);
-        log.info("new RTreeIndex was set");
+        log.debug("new RTreeIndex was set");
     }
 
     @Override
     public synchronized RTreeIndex consume(long timeout, TimeUnit unit) throws TimeoutException, InterruptedException {
-        log.info("Consuming new RTreeIndex");
+        log.debug("Consuming new RTreeIndex");
         RTreeIndex index = super.consume(timeout, unit);
-        log.info("new RTreeIndex consumed with size = {}", index.getSize());
+        log.debug("new RTreeIndex consumed with size = {}", index.getSize());
         return index;
     }
 }
