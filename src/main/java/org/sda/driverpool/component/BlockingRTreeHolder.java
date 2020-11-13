@@ -1,13 +1,13 @@
 package org.sda.driverpool.component;
 
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.sda.driverpool.entity.RTreeIndex;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-@Log4j2
+@Slf4j
 @Component
 class BlockingRTreeHolder extends BlockingItemHolder<RTreeIndex> {
     @Override

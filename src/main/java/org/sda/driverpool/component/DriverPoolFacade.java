@@ -1,7 +1,7 @@
 package org.sda.driverpool.component;
 
 import lombok.AllArgsConstructor;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.sda.driverpool.entity.RTreeIndex;
 import org.sda.driverpool.entity.RecentDriverStatusUpdate;
 import org.sda.driverpool.event.OrderGotDriverEvent;
@@ -14,7 +14,7 @@ import java.util.concurrent.TimeoutException;
 
 @Component
 @AllArgsConstructor
-@Log4j2
+@Slf4j
 public class DriverPoolFacade {
     private final RTreeProvider rTreeProvider;
     private final RecentDriverStatusUpdatesStorage storage;

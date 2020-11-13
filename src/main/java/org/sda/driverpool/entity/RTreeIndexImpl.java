@@ -4,14 +4,14 @@ import com.github.davidmoten.rtree.Entry;
 import com.github.davidmoten.rtree.RTree;
 import com.github.davidmoten.rtree.geometry.Point;
 import lombok.AllArgsConstructor;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.github.davidmoten.rtree.geometry.Geometries.point;
 
-@Log4j2
+@Slf4j
 @AllArgsConstructor
 public class RTreeIndexImpl implements RTreeIndex {
     private final RTree<RecentDriverStatusUpdate, Point> rTree;

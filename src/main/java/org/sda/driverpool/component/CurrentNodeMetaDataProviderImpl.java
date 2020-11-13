@@ -1,12 +1,12 @@
 package org.sda.driverpool.component;
 
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.UUID;
 
-@Log4j2
+@Slf4j
 @Component
 public class CurrentNodeMetaDataProviderImpl implements CurrentNodeMetaDataProvider {
 
