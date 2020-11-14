@@ -3,6 +3,7 @@ WORKDIR /opt/app
 COPY ./src ./src
 COPY ./pom.xml ./pom.xml
 COPY mvnw_for_docker ./mvnw
+RUN chmod 777 mvnw
 COPY ./.mvn ./.mvn
 RUN ./mvnw clean install -Dmaven.test.skip=true -DskipTests=true
 RUN rm -fr /root/.m2
