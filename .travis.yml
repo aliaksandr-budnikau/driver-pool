@@ -11,9 +11,8 @@ cache:
 jdk:
   - openjdk11
 before_install:
-  - mvn clean install
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-
+script: mvn clean install
 deploy:
   provider: script
   script: bash ./deploy.sh
