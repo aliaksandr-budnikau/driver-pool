@@ -1,7 +1,4 @@
 FROM adoptopenjdk/openjdk11:alpine-jre
 WORKDIR /opt/app
-ARG JAR_FILE=./target/driver-pool-1.0-SNAPSHOT.jar
-COPY ${JAR_FILE} ./driver-pool.jar
-#RUN useradd spring && adduser spring spring
-#USER spring:spring
+COPY /home/travis/build/aliaksandr-budnikau/driver-pool/target/driver-pool-1.0-SNAPSHOT.jar ./driver-pool.jar
 ENTRYPOINT ["java","-jar","driver-pool.jar"]
