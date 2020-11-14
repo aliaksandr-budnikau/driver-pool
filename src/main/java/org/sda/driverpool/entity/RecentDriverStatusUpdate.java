@@ -17,5 +17,5 @@ public class RecentDriverStatusUpdate {
     @EqualsAndHashCode.Include
     private final DriverStatus status;
     @EqualsAndHashCode.Include
-    private final String eventSourceNodeId;
+    private final String eventId;
 }

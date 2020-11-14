@@ -14,9 +14,14 @@ public class CurrentNodeMetaDataProviderImpl implements CurrentNodeMetaDataProvi
 
     @PostConstruct
     public void init() {
+        this.currentNodeId = generateId();
+        log.info("The node id is {}", this.currentNodeId);
+    }
+
+    @Override
+    public String generateId() {
         String uuid = UUID.randomUUID().toString();
-        currentNodeId = uuid.split("-")[0] + uuid.split("-")[1];
-        log.info("The node id is {}", currentNodeId);
+        return uuid.split("-")[0] + uuid.split("-")[1];
     }
 
     @Override

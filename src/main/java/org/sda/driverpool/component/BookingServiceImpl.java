@@ -39,6 +39,7 @@ class BookingServiceImpl implements BookingService {
             return false;
         }
 
+        String updateEventId;
         if (actualDriverStatus.getStatus() == PENDING_ORDER) {
             RecentDriverStatusUpdate update = recentDriverStatusUpdateFactory.get(
                     actualDriverStatus.getDriverId(),
@@ -46,6 +47,7 @@ class BookingServiceImpl implements BookingService {
                     actualDriverStatus.getLongitude(),
                     ON_RIDE
             );
+            updateEventId = update.getEventId();
             log.info("Preliminarily booking");
             storage.add(update);
             log.info("Booked");
@@ -62,13 +64,12 @@ class BookingServiceImpl implements BookingService {
 
         DriverStatus newestStatus = lastTwo.get(0).getStatus();
         DriverStatus beforeNewestStatus = lastTwo.get(1).getStatus();
-        String newestUpdateNodeId = lastTwo.get(0).getEventSourceNodeId();
-        String currentNodeId = currentNodeMetaDataProvider.getCurrentNodeId();
-        if (newestStatus != ON_RIDE || beforeNewestStatus != PENDING_ORDER || !newestUpdateNodeId.equals(currentNodeId)) {
+        String newestUpdateId = lastTwo.get(0).getEventId();
+        if (newestStatus != ON_RIDE || beforeNewestStatus != PENDING_ORDER || !newestUpdateId.equals(updateEventId)) {
             log.warn("Skipping. Candidate is probably busy. " +
                             "newestStatus = {}, beforeNewestStatus = {}" +
                             "{} != {}",
-                    newestStatus, beforeNewestStatus, newestUpdateNodeId, currentNodeId);
+                    newestStatus, beforeNewestStatus, newestUpdateId, updateEventId);
             return false;
         }
 

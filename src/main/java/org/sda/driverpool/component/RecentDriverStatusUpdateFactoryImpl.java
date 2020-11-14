@@ -14,6 +14,7 @@ public class RecentDriverStatusUpdateFactoryImpl implements RecentDriverStatusUp
     @Override
     public RecentDriverStatusUpdate get(String driverId, float latitude, float longitude, DriverStatus status) {
         String currentNodeId = currentNodeMetaDataProvider.getCurrentNodeId();
-        return new RecentDriverStatusUpdate(driverId, latitude, longitude, status, currentNodeId);
+        String id = currentNodeMetaDataProvider.generateId();
+        return new RecentDriverStatusUpdate(driverId, latitude, longitude, status, currentNodeId + "-" + id);
     }
 }

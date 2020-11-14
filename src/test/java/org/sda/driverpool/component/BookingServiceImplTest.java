@@ -76,7 +76,6 @@ public class BookingServiceImplTest {
         when(storage.getById(candidate.getDriverId(), 2)).thenReturn(asList(candidate, candidate));
         when(recentDriverStatusUpdateFactory.get(candidate.getDriverId(), candidate.getLatitude(), candidate.getLongitude(), ON_RIDE))
                 .thenReturn(new RecentDriverStatusUpdate(candidate.getDriverId(), candidate.getLatitude(), candidate.getLongitude(), ON_RIDE, "qweqwe"));
-        when(currentNodeMetaDataProvider.getCurrentNodeId()).thenReturn("qweqwe");
         assertFalse(service.tryBooking(candidate));
         verify(storage).add(new RecentDriverStatusUpdate(candidate.getDriverId(), candidate.getLatitude(), candidate.getLongitude(), ON_RIDE, "qweqwe"));
     }
@@ -89,7 +88,6 @@ public class BookingServiceImplTest {
         when(storage.getById(candidate.getDriverId(), 2)).thenReturn(asList(candidateWasTakeOnAnotherNode, candidate));
         when(recentDriverStatusUpdateFactory.get(candidate.getDriverId(), candidate.getLatitude(), candidate.getLongitude(), ON_RIDE))
                 .thenReturn(new RecentDriverStatusUpdate(candidate.getDriverId(), candidate.getLatitude(), candidate.getLongitude(), ON_RIDE, "qweqwe"));
-        when(currentNodeMetaDataProvider.getCurrentNodeId()).thenReturn("qweqwe");
 
         assertFalse(service.tryBooking(candidate));
         verify(storage).add(new RecentDriverStatusUpdate(candidate.getDriverId(), candidate.getLatitude(), candidate.getLongitude(), ON_RIDE, "qweqwe"));
@@ -104,7 +102,6 @@ public class BookingServiceImplTest {
         );
         when(recentDriverStatusUpdateFactory.get(candidate.getDriverId(), candidate.getLatitude(), candidate.getLongitude(), ON_RIDE))
                 .thenReturn(new RecentDriverStatusUpdate(candidate.getDriverId(), candidate.getLatitude(), candidate.getLongitude(), ON_RIDE, "qweqwe"));
-        when(currentNodeMetaDataProvider.getCurrentNodeId()).thenReturn("qweqwe");
 
         assertTrue(service.tryBooking(candidate));
         verify(storage).add(new RecentDriverStatusUpdate(candidate.getDriverId(), candidate.getLatitude(), candidate.getLongitude(), ON_RIDE, "qweqwe"));
