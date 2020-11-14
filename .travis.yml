@@ -12,6 +12,8 @@ jdk:
   - openjdk11
 before_install:
   - mvn clean install
+  - ls -al
+  - ls -al target/
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 
 deploy:
