@@ -7,6 +7,7 @@ import org.sda.driverpool.entity.RecentDriverStatusUpdate;
 import org.sda.driverpool.event.OrderGotDriverEvent;
 import org.sda.driverpool.event.OrderPendingDriverEvent;
 import org.sda.driverpool.event.RecentDriverStatusUpdateEvent;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.TimeUnit;
@@ -24,6 +25,7 @@ public class DriverPoolFacade {
     //@Value("org.sda.driverpool.rtreeGetting.timeoutInMilliseconds")
     private final int timeoutInMilliseconds = 5000;
 
+    @KafkaListener(topics = "${kafka.recentDriverStatusUpdateEventTopic}", containerFactory = "recentDriverStatusUpdateEventTopicListenerContainerFactory")
     public void handle(RecentDriverStatusUpdateEvent event) {
         RecentDriverStatusUpdate update = recentDriverStatusUpdateFactory.get(
                 event.getDriverId(),
@@ -36,6 +38,7 @@ public class DriverPoolFacade {
         log.debug("Added");
     }
 
+    @KafkaListener(topics = "${kafka.orderPendingDriverEventTopic}", containerFactory = "orderPendingDriverEventTopicListenerContainerFactory")
     public void handle(OrderPendingDriverEvent event) throws InterruptedException {
         log.info("Driver finding {}", event);
         RTreeIndex rTree;

@@ -1,5 +1,6 @@
 package org.sda.driverpool.component;
 
+import lombok.SneakyThrows;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -11,13 +12,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.verify;
 import static org.sda.driverpool.entity.DriverStatus.ON_RIDE;
@@ -25,6 +26,7 @@ import static org.sda.driverpool.entity.DriverStatus.PENDING_ORDER;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest
+@TestPropertySource("classpath:test.properties")
 @ContextConfiguration(classes = Application.class, loader = AnnotationConfigContextLoader.class)
 public class DriverPoolFacadeWithContextIntegTest {
 
@@ -83,19 +85,13 @@ public class DriverPoolFacadeWithContextIntegTest {
         }
     }
 
+    @SneakyThrows
     private void sleep(int time) {
-        try {
-            Thread.sleep(time);
-        } catch (InterruptedException e) {
-            new RuntimeException(e);
-        }
+        Thread.sleep(time);
     }
 
+    @SneakyThrows
     private void await(CountDownLatch countDownLatch) {
-        try {
-            countDownLatch.await();
-        } catch (InterruptedException e) {
-            new RuntimeException(e);
-        }
+        countDownLatch.await();
     }
 }
