@@ -1,7 +1,9 @@
 package org.sda.driverpool.component;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.sda.driverpool.entity.RecentDriverStatusUpdate;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
@@ -12,9 +14,13 @@ import java.util.Set;
 import static java.util.stream.Collectors.toList;
 
 @Component
-@AllArgsConstructor
+@RequiredArgsConstructor
 class RecentDriverStatusUpdatesStorageImpl implements RecentDriverStatusUpdatesStorage {
     private final LinkedList<RecentDriverStatusUpdate> recentDriverStatusUpdatesList;
+    private final KafkaTemplate<String, RecentDriverStatusUpdate> kafkaTemplate;
+
+    @Value(value = "${kafka.recentDriverStatusUpdateTopic}")
+    private String recentDriverStatusUpdateTopic;
 
     @Override
     public Set<RecentDriverStatusUpdate> getAll() {
@@ -23,6 +29,7 @@ class RecentDriverStatusUpdatesStorageImpl implements RecentDriverStatusUpdatesS
 
     @Override
     public void add(RecentDriverStatusUpdate update) {
+        kafkaTemplate.send(recentDriverStatusUpdateTopic, update.getDriverId(), update);
         recentDriverStatusUpdatesList.addFirst(update);
     }
 

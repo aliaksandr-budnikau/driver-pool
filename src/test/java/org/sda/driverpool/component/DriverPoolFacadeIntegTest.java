@@ -4,9 +4,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.sda.driverpool.entity.DriverStatus;
+import org.sda.driverpool.entity.RecentDriverStatusUpdate;
 import org.sda.driverpool.event.OrderGotDriverEvent;
 import org.sda.driverpool.event.OrderPendingDriverEvent;
 import org.sda.driverpool.event.RecentDriverStatusUpdateEvent;
+import org.springframework.kafka.core.KafkaTemplate;
 
 import java.util.LinkedList;
 import java.util.Random;
@@ -24,7 +26,8 @@ public class DriverPoolFacadeIntegTest {
     @Before
     public void setUp() {
         eventSender = mock(EventSender.class);
-        storage = new RecentDriverStatusUpdatesStorageImpl(new LinkedList<>());
+        KafkaTemplate<String, RecentDriverStatusUpdate> template = mock(KafkaTemplate.class);
+        storage = new RecentDriverStatusUpdatesStorageImpl(new LinkedList<>(), template);
 
         BlockingRTreeHolder blockingRTreeHolder = new BlockingRTreeHolder();
 
@@ -32,7 +35,7 @@ public class DriverPoolFacadeIntegTest {
         CurrentNodeMetaDataProviderImpl currentNodeMetaDataProvider = new CurrentNodeMetaDataProviderImpl();
         currentNodeMetaDataProvider.init();
         RecentDriverStatusUpdateFactoryImpl recentDriverStatusUpdateFactory = new RecentDriverStatusUpdateFactoryImpl(currentNodeMetaDataProvider);
-        facade = new DriverPoolFacade(rTreeProvider, storage, eventSender, new BookingServiceImpl(storage, recentDriverStatusUpdateFactory, currentNodeMetaDataProvider), recentDriverStatusUpdateFactory);
+        facade = new DriverPoolFacade(rTreeProvider, storage, eventSender, new BookingServiceImpl(storage, recentDriverStatusUpdateFactory), recentDriverStatusUpdateFactory);
         Random random = new Random();
         for (int i = 0; i < 1000; i++) {
             int driverId = random.nextInt(100);

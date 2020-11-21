@@ -10,8 +10,8 @@ import org.springframework.kafka.annotation.EnableKafka;
 @EnableKafka
 class KafkaConfig {
     private static final String BOOTSTRAP_SERVERS_CONFIG = "localhost:9092";
-    @Value(value = "${kafka.bootstrapAddress}")
+    @Value("${kafka.bootstrapAddress}")
     private String bootstrapAddress;
-    @Value(value = "${kafka.consumerGroupId}")
+    @Value("${kafka.consumerGroupId}")
     private String consumerGroupId;
 }

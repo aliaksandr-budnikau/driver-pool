@@ -4,11 +4,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.sda.driverpool.entity.DriverStatus;
 import org.sda.driverpool.entity.RecentDriverStatusUpdate;
+import org.springframework.kafka.core.KafkaTemplate;
 
 import java.util.LinkedList;
 
 import static java.util.stream.IntStream.range;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
 
 public class RecentDriverStatusUpdatesStorageTest {
 
@@ -18,7 +20,8 @@ public class RecentDriverStatusUpdatesStorageTest {
     @Before
     public void setUp() {
         recentDriverStatusUpdatesList = new LinkedList<>();
-        storage = new RecentDriverStatusUpdatesStorageImpl(recentDriverStatusUpdatesList);
+        KafkaTemplate<String, RecentDriverStatusUpdate> template = mock(KafkaTemplate.class);
+        storage = new RecentDriverStatusUpdatesStorageImpl(recentDriverStatusUpdatesList, template);
     }
 
     @Test

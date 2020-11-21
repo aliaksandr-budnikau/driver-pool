@@ -18,7 +18,6 @@ class BookingServiceImpl implements BookingService {
 
     private final RecentDriverStatusUpdatesStorage storage;
     private final RecentDriverStatusUpdateFactory recentDriverStatusUpdateFactory;
-    private final CurrentNodeMetaDataProvider currentNodeMetaDataProvider;
 
     @Override
     public boolean tryBooking(RecentDriverStatusUpdate candidate) {
