@@ -1,5 +1,6 @@
 package org.sda.driverpool.component;
 
+import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -10,7 +11,6 @@ import org.sda.driverpool.event.OrderPendingDriverEvent;
 import org.sda.driverpool.event.RecentDriverStatusUpdateEvent;
 import org.springframework.kafka.core.KafkaTemplate;
 
-import java.util.LinkedList;
 import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
@@ -27,7 +27,8 @@ public class DriverPoolFacadeIntegTest {
     public void setUp() {
         eventSender = mock(EventSender.class);
         KafkaTemplate<String, RecentDriverStatusUpdate> template = mock(KafkaTemplate.class);
-        storage = new RecentDriverStatusUpdatesStorageImpl(new LinkedList<>(), template);
+        KafkaConsumer<String, RecentDriverStatusUpdate> consumer = mock(KafkaConsumer.class);
+        storage = new RecentDriverStatusUpdatesStorageImpl(consumer, template);
 
         BlockingRTreeHolder blockingRTreeHolder = new BlockingRTreeHolder();
 

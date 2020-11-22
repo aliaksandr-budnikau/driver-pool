@@ -1,5 +1,6 @@
 package org.sda.driverpool.component;
 
+import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.junit.Before;
 import org.junit.Test;
 import org.sda.driverpool.entity.DriverStatus;
@@ -21,7 +22,8 @@ public class RecentDriverStatusUpdatesStorageTest {
     public void setUp() {
         recentDriverStatusUpdatesList = new LinkedList<>();
         KafkaTemplate<String, RecentDriverStatusUpdate> template = mock(KafkaTemplate.class);
-        storage = new RecentDriverStatusUpdatesStorageImpl(recentDriverStatusUpdatesList, template);
+        KafkaConsumer<String, RecentDriverStatusUpdate> consumer = mock(KafkaConsumer.class);
+        storage = new RecentDriverStatusUpdatesStorageImpl(consumer, template);
     }
 
     @Test

@@ -1,6 +1,9 @@
 package org.sda.driverpool.infra;
 
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.sda.driverpool.entity.RecentDriverStatusUpdate;
 import org.sda.driverpool.event.OrderPendingDriverEvent;
 import org.sda.driverpool.event.RecentDriverStatusUpdateEvent;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,8 +17,24 @@ import org.springframework.kafka.support.serializer.JsonDeserializer;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.util.Collections.singletonList;
+
 @Configuration
 public class KafkaConsumerConfig extends KafkaConfig {
+
+    @Value(value = "${kafka.recentDriverStatusUpdateTopic}")
+    private String recentDriverStatusUpdateTopic;
+
+    @Bean
+    KafkaConsumer<String, RecentDriverStatusUpdate> createRecentDriverStatusUpdatesConsumer() {
+        Map<String, Object> configs = basicConfig();
+        final KafkaConsumer<String, RecentDriverStatusUpdate> consumer = new KafkaConsumer<>(
+                configs,
+                new StringDeserializer(),
+                new JsonDeserializer<>(RecentDriverStatusUpdate.class));
+        consumer.subscribe(singletonList(recentDriverStatusUpdateTopic));
+        return consumer;
+    }
 
     @Bean
     ConsumerFactory<String, RecentDriverStatusUpdateEvent> recentDriverStatusUpdateEventTopicConsumerFactory() {
@@ -47,9 +66,9 @@ public class KafkaConsumerConfig extends KafkaConfig {
 
     private Map<String, Object> basicConfig() {
         Map<String, Object> props = new HashMap<>();
-        props.put(org.apache.kafka.clients.consumer.ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, getBootstrapAddress());
-        props.put(org.apache.kafka.clients.consumer.ConsumerConfig.GROUP_ID_CONFIG, getConsumerGroupId());
-        props.put(org.apache.kafka.clients.consumer.ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, getBootstrapAddress());
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, getConsumerGroupId());
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         return props;
     }
 }
