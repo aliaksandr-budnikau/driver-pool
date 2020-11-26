@@ -4,17 +4,16 @@ import lombok.SneakyThrows;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.sda.driverpool.Application;
 import org.sda.driverpool.event.OrderGotDriverEvent;
 import org.sda.driverpool.event.OrderPendingDriverEvent;
 import org.sda.driverpool.event.RecentDriverStatusUpdateEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.kafka.test.context.EmbeddedKafka;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
@@ -26,8 +25,9 @@ import static org.sda.driverpool.entity.DriverStatus.PENDING_ORDER;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest
+@DirtiesContext
+@EmbeddedKafka(partitions = 10, brokerProperties = {"listeners=PLAINTEXT://localhost:9092", "port=9092"})
 @TestPropertySource("classpath:test.properties")
-@ContextConfiguration(classes = Application.class, loader = AnnotationConfigContextLoader.class)
 public class DriverPoolFacadeWithContextIntegTest {
 
     @MockBean

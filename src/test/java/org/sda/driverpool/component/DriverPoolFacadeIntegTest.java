@@ -1,42 +1,45 @@
 package org.sda.driverpool.component;
 
-import org.apache.kafka.clients.consumer.KafkaConsumer;
+import lombok.SneakyThrows;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.sda.driverpool.entity.DriverStatus;
-import org.sda.driverpool.entity.RecentDriverStatusUpdate;
 import org.sda.driverpool.event.OrderGotDriverEvent;
 import org.sda.driverpool.event.OrderPendingDriverEvent;
 import org.sda.driverpool.event.RecentDriverStatusUpdateEvent;
-import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.kafka.test.context.EmbeddedKafka;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+
+@RunWith(SpringRunner.class)
+@SpringBootTest
+@DirtiesContext
+@EmbeddedKafka(partitions = 10, brokerProperties = {"listeners=PLAINTEXT://localhost:9092", "port=9092"})
+@TestPropertySource("classpath:test.properties")
 public class DriverPoolFacadeIntegTest {
 
-    private EventSender eventSender;
-    private RecentDriverStatusUpdatesStorage storage;
+    @Autowired
     private DriverPoolFacade facade;
+    @MockBean
+    private EventSender eventSender;
+    @Autowired
+    private RTreeRefresher refresher;
 
+    @SneakyThrows
     @Before
     public void setUp() {
-        eventSender = mock(EventSender.class);
-        KafkaTemplate<String, RecentDriverStatusUpdate> template = mock(KafkaTemplate.class);
-        KafkaConsumer<String, RecentDriverStatusUpdate> consumer = mock(KafkaConsumer.class);
-        storage = new RecentDriverStatusUpdatesStorageImpl(consumer, template);
-
-        BlockingRTreeHolder blockingRTreeHolder = new BlockingRTreeHolder();
-
-        RTreeProvider rTreeProvider = new RTreeProviderImpl(blockingRTreeHolder);
-        CurrentNodeMetaDataProviderImpl currentNodeMetaDataProvider = new CurrentNodeMetaDataProviderImpl();
-        currentNodeMetaDataProvider.init();
-        RecentDriverStatusUpdateFactoryImpl recentDriverStatusUpdateFactory = new RecentDriverStatusUpdateFactoryImpl(currentNodeMetaDataProvider);
-        facade = new DriverPoolFacade(rTreeProvider, storage, eventSender, new BookingServiceImpl(storage, recentDriverStatusUpdateFactory), recentDriverStatusUpdateFactory);
         Random random = new Random();
         for (int i = 0; i < 1000; i++) {
             int driverId = random.nextInt(100);
@@ -71,13 +74,13 @@ public class DriverPoolFacadeIntegTest {
                 )
         );
 
-        new RTreeRefresher(new RTreeFactoryImpl(), blockingRTreeHolder, storage).refresh();
+        refresher.refresh();
     }
 
+    @SneakyThrows
     @Test
-    public void test() throws InterruptedException {
-        OrderPendingDriverEvent event = new OrderPendingDriverEvent(53.897920f, 27.562034f, 0.003854);
-        facade.handle(event);
+    public void test() {
+        facade.handle(new OrderPendingDriverEvent(53.897920f, 27.562034f, 0.003854));
 
         ArgumentCaptor<OrderGotDriverEvent> captor = ArgumentCaptor.forClass(OrderGotDriverEvent.class);
         verify(eventSender).send(captor.capture());

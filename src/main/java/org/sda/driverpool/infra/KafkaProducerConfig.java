@@ -2,7 +2,6 @@ package org.sda.driverpool.infra;
 
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.sda.driverpool.entity.RecentDriverStatusUpdate;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
@@ -24,14 +23,14 @@ public class KafkaProducerConfig extends KafkaConfig {
     }
 
     @Bean
-    ProducerFactory<String, RecentDriverStatusUpdate> producerFactory() {
+    ProducerFactory<String, Object> producerFactory() {
         return new DefaultKafkaProducerFactory<>(basicConfig(),
                 new StringSerializer(),
                 new JsonSerializer<>());
     }
 
     @Bean
-    KafkaTemplate<String, RecentDriverStatusUpdate> kafkaTemplate() {
+    KafkaTemplate<String, Object> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
     }
 }

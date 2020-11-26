@@ -9,9 +9,20 @@ import org.springframework.kafka.annotation.EnableKafka;
 @Configuration
 @EnableKafka
 class KafkaConfig {
-    private static final String BOOTSTRAP_SERVERS_CONFIG = "localhost:9092";
     @Value("${kafka.bootstrapAddress}")
     private String bootstrapAddress;
     @Value("${kafka.consumerGroupId}")
     private String consumerGroupId;
+    @Value("${kafka.recentDriverStatusUpdateTopic}")
+    private String recentDriverStatusUpdateTopic;
+    @Value("${kafka.recentDriverStatusUpdateTopicPartitionsNumber:3}")
+    private int recentDriverStatusUpdateTopicPartitionsNumber;
+    @Value("${kafka.orderPendingDriverEventTopic}")
+    private String orderPendingDriverEventTopic;
+    @Value("${kafka.orderPendingDriverEventTopicPartitionsNumber:3}")
+    private int orderPendingDriverEventTopicPartitionsNumber;
+    @Value("${kafka.recentDriverStatusUpdateEventTopic}")
+    private String recentDriverStatusUpdateEventTopic;
+    @Value("${kafka.recentDriverStatusUpdateEventTopicPartitionsNumber:3}")
+    private int recentDriverStatusUpdateEventTopicPartitionsNumber;
 }

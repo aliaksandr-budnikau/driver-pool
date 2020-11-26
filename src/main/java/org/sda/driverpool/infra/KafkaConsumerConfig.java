@@ -2,11 +2,11 @@ package org.sda.driverpool.infra;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.consumer.RoundRobinAssignor;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.sda.driverpool.entity.RecentDriverStatusUpdate;
 import org.sda.driverpool.event.OrderPendingDriverEvent;
 import org.sda.driverpool.event.RecentDriverStatusUpdateEvent;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
@@ -22,17 +22,17 @@ import static java.util.Collections.singletonList;
 @Configuration
 public class KafkaConsumerConfig extends KafkaConfig {
 
-    @Value(value = "${kafka.recentDriverStatusUpdateTopic}")
-    private String recentDriverStatusUpdateTopic;
-
     @Bean
     KafkaConsumer<String, RecentDriverStatusUpdate> createRecentDriverStatusUpdatesConsumer() {
         Map<String, Object> configs = basicConfig();
+        final String STORAGE_GROUP = "storage-group";
+        configs.put(ConsumerConfig.GROUP_ID_CONFIG, getConsumerGroupId() + STORAGE_GROUP);
+        configs.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG, RoundRobinAssignor.class.getName());
         final KafkaConsumer<String, RecentDriverStatusUpdate> consumer = new KafkaConsumer<>(
                 configs,
                 new StringDeserializer(),
                 new JsonDeserializer<>(RecentDriverStatusUpdate.class));
-        consumer.subscribe(singletonList(recentDriverStatusUpdateTopic));
+        consumer.subscribe(singletonList(getRecentDriverStatusUpdateTopic()));
         return consumer;
     }
 

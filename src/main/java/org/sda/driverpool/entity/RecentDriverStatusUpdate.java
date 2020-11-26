@@ -18,6 +18,5 @@ public class RecentDriverStatusUpdate {
     private float longitude;
     @EqualsAndHashCode.Include
     private DriverStatus status;
-    @EqualsAndHashCode.Include
     private String eventId;
 }

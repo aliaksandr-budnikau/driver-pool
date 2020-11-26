@@ -47,7 +47,6 @@ public class DriverPoolFacade {
         } catch (TimeoutException e) {
             throw new RuntimeException(e);
         }
-
         log.info("Traversing candidates for order");
         for (RecentDriverStatusUpdate candidate : rTree.getClosest(event.getLatitude(), event.getLongitude(), event.getMaxDistance(), 10)) {
             if (!bookingService.tryBooking(candidate)) {
