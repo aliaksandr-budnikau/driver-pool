@@ -18,7 +18,7 @@ class RTreeRefresher {
 
     @Scheduled(fixedDelay = REFRESH_RATE_IN_MILLISECONDS)
     public void refresh() {
-        Set<RecentDriverStatusUpdate> drivers = storage.getAll();
+        Set<RecentDriverStatusUpdate> drivers = storage.getAll(true);
         RTreeIndex rTree = rTreeFactory.create(drivers);
         holder.produce(rTree);
     }

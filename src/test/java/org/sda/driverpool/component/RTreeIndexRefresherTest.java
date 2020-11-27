@@ -29,7 +29,7 @@ public class RTreeIndexRefresherTest {
     @Test
     public void refresh() {
         HashSet<RecentDriverStatusUpdate> set = new HashSet<>();
-        when(storage.getAll()).thenReturn(set);
+        when(storage.getAll(true)).thenReturn(set);
         when(rTreeFactory.create(set)).thenReturn(new RTreeIndexImpl(null));
         refresher.refresh();
         verify(holder).produce(any(RTreeIndex.class));

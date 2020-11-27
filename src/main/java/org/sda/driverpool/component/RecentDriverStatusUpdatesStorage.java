@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 interface RecentDriverStatusUpdatesStorage {
-    Set<RecentDriverStatusUpdate> getAll();
+    Set<RecentDriverStatusUpdate> getAll(boolean fromCache);
 
     void add(RecentDriverStatusUpdate update);
 

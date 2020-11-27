@@ -36,7 +36,7 @@ public class RecentDriverStatusUpdatesStorageImplIntegTest {
                 storage.add(update);
             }
         });
-        assertTrue(storage.getAll().size() > 5);
+        assertTrue(storage.getAll(true).size() > 5);
 
         String driver1Id = "driver1";
         RecentDriverStatusUpdate driver1 = storage.getById(driver1Id);
