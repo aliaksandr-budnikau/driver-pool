@@ -9,16 +9,16 @@ public class KafkaTopicConfig extends KafkaConfig {
 
     @Bean
     public NewTopic recentDriverStatusUpdateTopic() {
-        return new NewTopic(getRecentDriverStatusUpdateTopic(), getRecentDriverStatusUpdateTopicPartitionsNumber(), (short) 2);
+        return new NewTopic(getRecentDriverStatusUpdateTopic(), getRecentDriverStatusUpdateTopicPartitionsNumber(), (short) 1);
     }
 
     @Bean
     public NewTopic recentDriverStatusUpdateEventTopic() {
-        return new NewTopic(getRecentDriverStatusUpdateEventTopic(), getRecentDriverStatusUpdateEventTopicPartitionsNumber(), (short) 2);
+        return new NewTopic(getRecentDriverStatusUpdateEventTopic(), getRecentDriverStatusUpdateEventTopicPartitionsNumber(), (short) 1);
     }
 
     @Bean
     public NewTopic orderPendingDriverEventTopic() {
-        return new NewTopic(getOrderPendingDriverEventTopic(), getOrderPendingDriverEventTopicPartitionsNumber(), (short) 2);
+        return new NewTopic(getOrderPendingDriverEventTopic(), getOrderPendingDriverEventTopicPartitionsNumber(), (short) 1);
     }
 }
