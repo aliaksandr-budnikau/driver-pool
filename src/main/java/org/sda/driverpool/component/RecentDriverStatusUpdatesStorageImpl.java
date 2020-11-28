@@ -3,6 +3,8 @@ package org.sda.driverpool.component;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -21,11 +23,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.lang.System.currentTimeMillis;
+import static java.lang.Thread.sleep;
 import static java.time.Duration.of;
 import static java.time.temporal.ChronoUnit.MILLIS;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 class RecentDriverStatusUpdatesStorageImpl implements RecentDriverStatusUpdatesStorage {
@@ -40,6 +44,10 @@ class RecentDriverStatusUpdatesStorageImpl implements RecentDriverStatusUpdatesS
     private int recentDriverStatusUpdateTopicRelevantLengthPerPartition;
     @Value("${kafka.allRecentDriverStatusUpdateCacheDurabilityTimeInSeconds:10}")
     private int allRecentDriverStatusUpdateCacheDurabilityTimeInSeconds;
+    @Value("${kafka.numberTriesToFetchRecentDriverStatusUpdates:3}")
+    private int numberTriesToFetchRecentDriverStatusUpdates;
+    @Value("${kafka.delayForTriesToFetchRecentDriverStatusUpdates:100}")
+    private int delayForTriesToFetchRecentDriverStatusUpdatesInMillis;
 
     @Override
     public Set<RecentDriverStatusUpdate> getAll(boolean fromCache) {
@@ -69,22 +77,33 @@ class RecentDriverStatusUpdatesStorageImpl implements RecentDriverStatusUpdatesS
     }
 
     private List<RecentDriverStatusUpdate> getRecentDriverStatusUpdateStream(boolean fromCache) {
+        return getRecentDriverStatusUpdateStream(fromCache, 0);
+    }
+
+    @SneakyThrows
+    private List<RecentDriverStatusUpdate> getRecentDriverStatusUpdateStream(boolean fromCache, int attempt) {
         if (shouldUseCache(fromCache)) {
+            log.debug("Cache hit");
             return cachedGetAllResult.getResult();
         }
 
         ConsumerRecords<String, RecentDriverStatusUpdate> poll;
         synchronized (this) {
+            log.debug("entered synchronized block");
             if (shouldUseCache(fromCache)) {
+                log.debug("Cache hit");
                 return cachedGetAllResult.getResult();
             }
             Set<TopicPartition> partitions = consumer.assignment();
             consumer.seekToEnd(partitions);
             partitions.forEach(key -> {
+                log.debug("working with partition {}", key);
                 long offset = consumer.position(key) - recentDriverStatusUpdateTopicRelevantLengthPerPartition;
                 consumer.seek(key, offset < 0 ? 0 : offset);
+                log.debug("finished");
             });
             poll = consumer.poll(of(100, MILLIS));
+            log.debug("finished synchronized block");
         }
 
         List<RecentDriverStatusUpdate> result = stream(poll.spliterator(), false)
@@ -93,9 +112,18 @@ class RecentDriverStatusUpdatesStorageImpl implements RecentDriverStatusUpdatesS
                 .collect(toList());
 
         if (result.isEmpty()) {
-            return result;
+            log.debug("empty result");
+            if (attempt == numberTriesToFetchRecentDriverStatusUpdates) {
+                log.debug("no more attempts");
+                return result;
+            }
+            sleep(delayForTriesToFetchRecentDriverStatusUpdatesInMillis);
+            int newAttemptNumber = attempt + 1;
+            log.debug("attempt {}", newAttemptNumber);
+            return getRecentDriverStatusUpdateStream(fromCache, newAttemptNumber);
         }
         cachedGetAllResult = new CachedGetAllResult(currentTimeMillis(), result);
+        log.debug("new cached result {} at {}", cachedGetAllResult.getResult().size(), cachedGetAllResult.getTimestamp());
         return result;
     }
 

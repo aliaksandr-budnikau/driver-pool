@@ -10,6 +10,7 @@ import org.sda.driverpool.event.RecentDriverStatusUpdateEvent;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -48,7 +49,9 @@ public class DriverPoolFacade {
             throw new RuntimeException(e);
         }
         log.info("Traversing candidates for order");
-        for (RecentDriverStatusUpdate candidate : rTree.getClosest(event.getLatitude(), event.getLongitude(), event.getMaxDistance(), 10)) {
+        List<RecentDriverStatusUpdate> closest = rTree.getClosest(event.getLatitude(), event.getLongitude(), event.getMaxDistance(), 10);
+        log.info("Found {} for traversing", closest.size());
+        for (RecentDriverStatusUpdate candidate : closest) {
             if (!bookingService.tryBooking(candidate)) {
                 continue;
             }
@@ -58,5 +61,6 @@ public class DriverPoolFacade {
             log.info("Traversing finished");
             return;
         }
+        log.info("Finished traversing");
     }
 }
