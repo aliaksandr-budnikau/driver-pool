@@ -2,6 +2,7 @@ package org.sda.driverpool.component;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.sda.driverpool.dto.RecentDriverStatusUpdateDTO;
 import org.sda.driverpool.entity.RTreeIndex;
 import org.sda.driverpool.entity.RecentDriverStatusUpdate;
 import org.sda.driverpool.event.OrderGotDriverEvent;
@@ -10,7 +11,9 @@ import org.sda.driverpool.event.RecentDriverStatusUpdateEvent;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -62,5 +65,20 @@ public class DriverPoolFacade {
             return;
         }
         log.info("Finished traversing");
+    }
+
+    public Set<RecentDriverStatusUpdateDTO> getAllDrivers(boolean fromCache) {
+        Set<RecentDriverStatusUpdate> all = storage.getAll(fromCache);
+        Set<RecentDriverStatusUpdateDTO> result = new HashSet<>();
+        for (RecentDriverStatusUpdate update : all) {
+            RecentDriverStatusUpdateDTO dto = new RecentDriverStatusUpdateDTO();
+            dto.setDriverId(update.getDriverId());
+            dto.setLatitude(update.getLatitude());
+            dto.setLongitude(update.getLongitude());
+            dto.setEventId(update.getEventId());
+            dto.setStatus(update.getStatus().name());
+            result.add(dto);
+        }
+        return result;
     }
 }
